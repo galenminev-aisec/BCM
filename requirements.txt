@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+chromadb
+openai
+python-dotenv
+pydantic
+pypdf
+onnxruntime
+cryptography

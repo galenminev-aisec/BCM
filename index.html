@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BCP Асистент</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy: #0a1f44;
+    --navy-mid: #122860;
+    --navy-light: #1a3a7a;
+    --gold: #c8a84b;
+    --gold-light: #e2c87a;
+    --white: #ffffff;
+    --off-white: #f5f6f8;
+    --text: #1a2340;
+    --text-muted: #6b7a99;
+    --border: #dce2ef;
+    --sans: 'Source Sans 3', sans-serif;
+    --serif: 'Playfair Display', serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--off-white);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--navy);
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    height: 60px;
+    border-bottom: 3px solid var(--gold);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-title {
+    font-family: var(--serif);
+    font-size: 16px;
+    color: var(--white);
+    font-weight: 400;
+    letter-spacing: 0.03em;
+  }
+
+  .header-title span {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(255,255,255,0.15);
+    margin: 0 20px;
+  }
+
+  .header-sub {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+  }
+
+  .status-pill {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.05em;
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .status-dot.online {
+    background: #4ade80;
+    box-shadow: 0 0 8px #4ade80;
+  }
+
+  /* DECORATIVE STRIPE */
+  .gold-stripe {
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 50%, transparent 100%);
+    opacity: 0.4;
+  }
+
+  /* MAIN */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 820px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 36px 24px 0;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--navy);
+    border-radius: 10px;
+    padding: 30px 36px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(200,168,75,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    opacity: 0.5;
+  }
+
+  .hero-tag {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 1px;
+    background: var(--gold);
+    opacity: 0.6;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: 24px;
+    color: var(--white);
+    font-weight: 400;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .hero p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    font-weight: 300;
+    line-height: 1.7;
+    max-width: 480px;
+  }
+
+  /* MESSAGES */
+  #messages {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-height: 100px;
+    margin-bottom: 20px;
+  }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    animation: slideIn 0.22s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-left: 4px;
+    font-weight: 500;
+  }
+
+  .msg.user .msg-label { color: var(--navy-light); }
+
+  .msg-body {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  .msg.user .msg-body {
+    background: var(--navy);
+    border-color: var(--navy-light);
+    color: rgba(255,255,255,0.88);
+    border-radius: 8px 8px 2px 8px;
+  }
+
+  .msg.assistant .msg-body {
+    border-left: 3px solid var(--gold);
+    border-radius: 2px 8px 8px 8px;
+  }
+
+  /* SOURCES */
+  .sources {
+    margin-top: 12px;
+  }
+
+  .source-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .source-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .source-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .source-chip {
+    background: var(--off-white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 5px 11px;
+    font-size: 11px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .source-chip:hover {
+    border-color: var(--gold);
+    color: var(--navy);
+    background: #fdf9f0;
+  }
+
+  .source-chip .chip-file {
+    color: var(--navy-light);
+    font-weight: 500;
+  }
+
+  .source-preview {
+    display: none;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    padding: 12px 14px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 6px 6px 0;
+  }
+  .source-preview.open { display: block; }
+
+  /* TYPING */
+  .typing-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 2px 8px 8px 8px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  .typing-wrap span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 1.3s infinite;
+  }
+  .typing-wrap span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-wrap span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 80%, 100% { opacity: 0.2; transform: scale(0.7); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  /* INPUT AREA */
+  .input-area {
+    position: sticky;
+    bottom: 0;
+    background: var(--off-white);
+    padding: 16px 0 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  textarea {
+    flex: 1;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 13px 16px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    resize: none;
+    min-height: 50px;
+    max-height: 160px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    line-height: 1.5;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--navy-light);
+    box-shadow: 0 0 0 3px rgba(26,58,122,0.07);
+  }
+
+  textarea::placeholder { color: var(--text-muted); }
+
+  button#send {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 0 24px;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    height: 50px;
+    white-space: nowrap;
+    border-bottom: 2px solid var(--gold);
+    position: relative;
+    overflow: hidden;
+  }
+
+  button#send::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(200,168,75,0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  button#send:hover { background: var(--navy-light); }
+  button#send:hover::after { opacity: 1; }
+  button#send:active { transform: scale(0.98); }
+  button#send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .hint {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+    letter-spacing: 0.03em;
+  }
+
+  .error-msg {
+    color: #b91c1c;
+    font-size: 13px;
+    padding: 12px 16px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="header-title">BCP <span>Асистент</span></span>
+  <div class="header-divider"></div>
+  <span class="header-sub">ISO 22301 · Business Continuity</span>
+  <div class="status-pill">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">свързване...</span>
+  </div>
+</header>
+<div class="gold-stripe"></div>
+
+<main>
+  <div class="hero">
+    <div class="hero-tag">Документален асистент</div>
+    <h1>Задайте въпрос по<br>BCP документацията</h1>
+    <p>Отговорите се базират на индексираните вътрешни документи, политики и стандарти.</p>
+  </div>
+
+  <div id="messages"></div>
+
+  <div class="input-area">
+    <div class="input-row">
+      <textarea id="query" rows="1" placeholder="Въведете въпрос..."></textarea>
+      <button id="send">Изпрати</button>
+    </div>
+    <div class="hint">Enter — изпрати &nbsp;·&nbsp; Shift+Enter — нов ред</div>
+  </div>
+</main>
+
+<script>
+  const API = "http://127.0.0.1:8000";
+
+  async function checkHealth() {
+    const dot = document.getElementById('statusDot');
+    const txt = document.getElementById('statusText');
+    try {
+      const r = await fetch(`${API}/health`);
+      if (r.ok) { dot.classList.add('online'); txt.textContent = 'система активна'; }
+      else { txt.textContent = 'грешка'; }
+    } catch { txt.textContent = 'няма връзка'; }
+  }
+  checkHealth();
+
+  const messagesEl = document.getElementById('messages');
+  const queryEl    = document.getElementById('query');
+  const sendBtn    = document.getElementById('send');
+
+  queryEl.addEventListener('input', () => {
+    queryEl.style.height = 'auto';
+    queryEl.style.height = Math.min(queryEl.scrollHeight, 160) + 'px';
+  });
+
+  queryEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  sendBtn.addEventListener('click', sendMessage);
+
+  function appendMsg(role, content, contexts) {
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+
+    const label = document.createElement('div');
+    label.className = 'msg-label';
+    label.textContent = role === 'user' ? 'Вие' : 'Асистент';
+    div.appendChild(label);
+
+    const body = document.createElement('div');
+    body.className = 'msg-body';
+    body.textContent = content;
+    div.appendChild(body);
+
+    if (contexts && contexts.length > 0) {
+      const srcs = document.createElement('div');
+      srcs.className = 'sources';
+
+      const sl = document.createElement('div');
+      sl.className = 'source-label';
+      sl.textContent = `Източници (${contexts.length})`;
+      srcs.appendChild(sl);
+
+      const chips = document.createElement('div');
+      chips.className = 'source-chips';
+      srcs.appendChild(chips);
+
+      contexts.forEach((c) => {
+        const file = c.metadata?.source_file || 'unknown';
+        const chunk = c.metadata?.chunk_index ?? '?';
+
+        const chip = document.createElement('div');
+        chip.className = 'source-chip';
+        chip.innerHTML = `<span class="chip-file">${file}</span><span>· ${chunk}</span>`;
+
+        const preview = document.createElement('div');
+        preview.className = 'source-preview';
+        preview.textContent = c.text?.slice(0, 320) + (c.text?.length > 320 ? '…' : '');
+
+        chip.addEventListener('click', () => preview.classList.toggle('open'));
+
+        chips.appendChild(chip);
+        srcs.appendChild(preview);
+      });
+
+      div.appendChild(srcs);
+    }
+
+    messagesEl.appendChild(div);
+    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
+  function showTyping() {
+    const div = document.createElement('div');
+    div.className = 'msg assistant';
+    div.id = 'typing-indicator';
+    const label = document.createElement('div');
+    label.className = 'msg-label';
+    label.textContent = 'Асистент';
+    div.appendChild(label);
+    const t = document.createElement('div');
+    t.className = 'typing-wrap';
+    t.innerHTML = '<span></span><span></span><span></span>';
+    div.appendChild(t);
+    messagesEl.appendChild(div);
+    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typing-indicator');
+    if (t) t.remove();
+  }
+
+  async function sendMessage() {
+    const query = queryEl.value.trim();
+    if (!query) return;
+
+    appendMsg('user', query);
+    queryEl.value = '';
+    queryEl.style.height = 'auto';
+    sendBtn.disabled = true;
+    showTyping();
+
+    try {
+      const resp = await fetch(`${API}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, top_k: 5 }),
+      });
+
+      removeTyping();
+
+      if (!resp.ok) {
+        const errText = await resp.text();
+        appendMsg('assistant', `Грешка ${resp.status}: ${errText}`);
+      } else {
+        const data = await resp.json();
+        appendMsg('assistant', data.answer, data.contexts);
+      }
+    } catch (err) {
+      removeTyping();
+      const errDiv = document.createElement('div');
+      errDiv.className = 'error-msg';
+      errDiv.textContent = `Грешка: ${err.message}`;
+      messagesEl.appendChild(errDiv);
+    } finally {
+      sendBtn.disabled = false;
+      queryEl.focus();
+    }
+  }
+</script>
+</body>
+</html>
