@@ -36,7 +36,8 @@ class ChatResponse(BaseModel):
 
 @app.get("/")
 def serve_frontend():
-    return FileResponse(r"c:\Users\Master\Downloads\bcp-grc\index.html")
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "index.html")
+    return FileResponse(path)
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
